@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      RabbitMQ, Node, Socket.io
+    </title>
+
+    <link href="//getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      #wall * {
+        width: 30px;
+        height: 30px;
+        margin: 5px 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="name" class="row">
+        <h1></h1>
+      </div>
+      <div id="wall" class="wall row"></div>
+    </div>
+    <div id="color-tester" />
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // Simple color test method
+      function testColor(color, callback) {
+        var valid = $('#color-tester').css('color');
+        $('#color-tester').css('color', color);
+
+        if (valid == $('#color-tester').css('color')) {
+          console.info("Invalid color received: " + color);
+        } else {
+          callback.call(undefined, color);
+          $('#color-tester').css('color', valid);
+        }
+      }
+      // Listening to socket.io
+      var socket = io.connect('http://localhost:8080');
+      var wall = $('#wall');
+      socket.on('workers', function (data) {
+        if(data.type === 'clear') {
+          wall.empty();
+        } else if(data.type === 'color') {
+          testColor(data.value, function(color) {
+            wall.append('<div class="col-md-1 red" style="background-color: ' + color + ';"></div>');
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

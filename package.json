@@ -1,0 +1,19 @@
+{
+  "name": "rabbitmq-demo-workers",
+  "version": "1.0.0",
+  "description": "An example module to illustrate ",
+  "author": "Etienne Peiniau <peiniau@ekino.com>",
+  "script": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "TODO"
+  },
+  "dependencies": {
+    "amqp": "0.2.0",
+    "socket.io": "0.9.16"
+  },
+  "preferGlobal": false,
+  "private": true
+}
