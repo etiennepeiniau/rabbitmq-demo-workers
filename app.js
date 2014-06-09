@@ -1,13 +1,12 @@
 'use strict';
 
-  // natives
+// natives
 var app = require('http').createServer(handler)
   , fs = require('fs')
-  , readline = require('readline')
-  // dependencies
+// dependencies
   , io = require('socket.io').listen(app)
   , amqp = require('amqp')
-  //  customs
+//  customs
   , ActionHandler = require('./lib/action-handler')
   , Action = require('./lib/action');
 
@@ -27,49 +26,48 @@ function handler(req, res) {
 }
 app.listen(8080);
 
-// read line TODO Remove
-var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-// create amqp connection and wait for it
+// create amqp connection and wait for socket
 var connection = amqp.createConnection({url: "amqp://guest:guest@localhost:5672"});
 connection.on('ready', function () {
   // socket.io
   var count = 0;
   io.sockets.on('connection', function (socket) {
-    // create the action handler
-    var actionHandler = new ActionHandler(socket);
     // create an user and increase count
     var user = 'user_' + count++;
-    console.log('New user: %s', user);
     socket.emit('user.name', { name: user });
     // receive user data
-    socket.on('user.data', function( data ) {
-      console.log('User data received %s', data);
+    socket.on('user.data', function (userData) {
       // creating its queues
-      connection.queue( user + '.queue', { durable: false, autoDelete : true, exclusive : true },  function (queue) {
-        console.log("Queue ready for %s", user);
-        // bind the queue to the tree exchange
-        queue.bind('rabbitmq.demo.direct', queue.name);
-        queue.bind('rabbitmq.demo.fanout', '');
-        queue.bind('rabbitmq.demo.topic', 'TODO'); // TODO Get the user info
-        // handle io disconnect
-        socket.on('disconnect', function () {
-          console.log('User %s disconnected', user);
-          queue.destroy();
-        });
-      });
-    })
-    // handle readline TODO Remove
-    rl.on('line', function (line) {
-      if (line === 'clear') {
-        actionHandler.handle(new Action('clear', ''));
-      } else {
-        actionHandler.handle(new Action('color', line));
-      }
+      handleUserQueue(user + '.queue', userData, new ActionHandler(socket), socket);
     });
   });
 });
+
+// handle new user queues
+function handleUserQueue(queueName, userData, actionHandler, socket) {
+  connection.queue(queueName, { durable: false, autoDelete: true, exclusive: true, closeChannelOnUnsubscribe: true }, function (queue) {
+    console.log('Queue %s created', queueName);
+    // bind the queue to the tree exchange
+    queue.bind('rabbitmq.demo.direct', queueName);
+    queue.bind('rabbitmq.demo.fanout', '');
+    queue.bind('rabbitmq.demo.topic', 'TODO'); // TODO Get the user info + slug
+    // subscribe to the queues
+    var consumerTag;
+    queue.subscribe(function (message) {
+      if (message === 'clear') {
+        actionHandler.handle(new Action('clear', ''));
+      } else {
+        actionHandler.handle(new Action('color', message));
+      }
+    }).addCallback(function (ok) {
+        consumerTag = ok.consumerTag;
+      });
+    // handle io disconnect
+    socket.on('disconnect', function () {
+      console.log('Destroy queue %s', queueName);
+      userQueue.unsubscribe(consumerTag); // should be called to close the channel
+      userQueue.destroy();
+    });
+  });
+}
 

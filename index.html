@@ -19,12 +19,11 @@
   </head>
   <body>
     <div class="container">
-      <div id="name" class="row"></div>
+      <div id="name" class="row"><h1></h1></div>
       <div id="wall" class="wall row"></div>
     </div>
     <div id="color-tester" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//getbootstrap.com/dist/js/bootstrap.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       // simple color test method
@@ -40,11 +39,14 @@
         }
       }
       // listening to socket.io
-      var socket = io.connect('http://localhost:8080');
+      var socket = io.connect('http://' + window.location.hostname + ':8080');
       // handling user name
       socket.on('user.name',function (data) {
-        $('#name').append('<h1>' + data.name + '</h1>');
-        socket.emit('user.data', { data: 'TODO'} );
+        $('#name h1').text(data.name);
+        socket.emit('user.data', {
+          vendor: window.navigator.vendor,
+          platform : window.navigator.platform
+        });
       });
       //
       var wall = $('#wall');
