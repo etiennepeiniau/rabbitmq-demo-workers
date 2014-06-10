@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "amqp": "0.2.0",
+    "slug": "0.5.0",
+    "q" : "1.0.1",
     "socket.io": "0.9.16"
   },
   "preferGlobal": false,
