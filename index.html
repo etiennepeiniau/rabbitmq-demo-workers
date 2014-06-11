@@ -39,7 +39,7 @@
         }
       }
       // listening to socket.io
-      var socket = io.connect('http://' + window.location.hostname + ':8080');
+      var socket = io.connect('http://' + window.location.hostname + ':8081');
       // handling user name
       socket.on('user.name',function (data) {
         $('#name h1').text(data.name);

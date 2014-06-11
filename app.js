@@ -25,7 +25,7 @@ function handler(req, res) {
       res.end(data);
     });
 }
-app.listen(8080);
+app.listen(8081);
 
 // create amqp connection and wait for socket
 var connection = amqp.createConnection({url: "amqp://guest:guest@localhost:5672"});
@@ -39,6 +39,8 @@ connection.on('ready', function () {
     socket.emit('user.name', { name: userName });
     // receive user data
     socket.on('user.data', function (userData) {
+      // add the client ip address
+      userData.ip = socket.handshake.address.address;
       // publish user data to server
       connection.publish('server.users.queue', userData);
       // creating user queue and action handler
