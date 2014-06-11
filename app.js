@@ -8,7 +8,7 @@ var app = require('http').createServer(handler)
   , amqp = require('amqp')
   , slug = require('slug')
 //  customs
-  , queueManager = require('./lib/queue.js')
+  , queueManager = require('./lib/queue-manager.js')
   , ActionHandler = require('./lib/action-handler')
   , Action = require('./lib/action');
 
