@@ -6,7 +6,6 @@ var app = require('http').createServer(handler)
 // dependencies
   , io = require('socket.io').listen(app)
   , amqp = require('amqp')
-  , slug = require('slug')
 //  customs
   , queueManager = require('./lib/queue-manager.js')
   , ActionHandler = require('./lib/action-handler')
@@ -42,7 +41,7 @@ connection.on('ready', function () {
     socket.on('user.data', function (userData) {
       // creating user queue and action handler
       var actionHandler = new ActionHandler(socket);
-      var userBindingKey = slug(userData.vendor) + '.' + slug (userData.platform);
+      var userBindingKey = queueFactory.createBindingKey(userData.vendor, userData.platform);
       var queue = queueFactory.createQueue(userName, userBindingKey, function (message) {
         if (message === 'clear') {
           actionHandler.handle(new Action('clear', ''));
