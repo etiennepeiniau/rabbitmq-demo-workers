@@ -9,8 +9,8 @@ var app = require('http').createServer(handler)
   , slug = require('slug')
 //  customs
   , queueManager = require('./lib/queue.js')
-  , ActionHandler = require('./action-handler')
-  , Action = require('./action');
+  , ActionHandler = require('./lib/action-handler')
+  , Action = require('./lib/action');
 
 
 // start app server
