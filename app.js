@@ -39,6 +39,8 @@ connection.on('ready', function () {
     socket.emit('user.name', { name: userName });
     // receive user data
     socket.on('user.data', function (userData) {
+      // publish user data to server
+      connection.publish('server.users.queue', userData);
       // creating user queue and action handler
       var actionHandler = new ActionHandler(socket);
       var userBindingKey = queueFactory.createBindingKey(userData.vendor, userData.platform);
