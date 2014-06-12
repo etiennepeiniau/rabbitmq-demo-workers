@@ -39,10 +39,8 @@ connection.on('ready', function () {
     socket.emit('user.name', { name: userName });
     // receive user data
     socket.on('user.data', function (userData) {
-      // add the client ip address
-      userData.ip = socket.handshake.address.address;
-      // publish user data to server
-      connection.publish('server.users.queue', userData);
+      // add user to server
+      connection.publish('server.add.user.queue', userData);
       // creating user queue and action handler
       var actionHandler = new ActionHandler(socket);
       var userBindingKey = queueFactory.createBindingKey(userData.vendor, userData.platform);
@@ -56,6 +54,8 @@ connection.on('ready', function () {
       // handle io disconnect
       socket.on('disconnect', function () {
         queue.destroy();
+        // remove user to server
+        connection.publish('server.remove.user.queue', userData);
       });
     });
   });

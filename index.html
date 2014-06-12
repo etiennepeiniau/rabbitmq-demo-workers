@@ -44,6 +44,7 @@
       socket.on('user.name',function (data) {
         $('#name h1').text(data.name);
         socket.emit('user.data', {
+          name: data.name,
           vendor: window.navigator.vendor,
           platform : window.navigator.platform
         });
