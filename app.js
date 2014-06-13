@@ -39,12 +39,14 @@ connection.on('ready', function () {
     socket.emit('user.name', { name: userName });
     // receive user data
     socket.on('user.data', function (userData) {
+      // Add binding keys to user data
+      var userBindingKeys = queueFactory.createBindingKeys(userData.vendor, userData.platform);
+      userData.bindingKeys = userBindingKeys;
       // add user to server
       connection.publish('server.add.user.queue', userData);
       // creating user queue and action handler
       var actionHandler = new ActionHandler(socket);
-      var userBindingKey = queueFactory.createBindingKey(userData.vendor, userData.platform);
-      var queue = queueFactory.createQueue(userName, userBindingKey, function (message) {
+      var queue = queueFactory.createQueue(userName, userBindingKeys, function (message) {
         actionHandler.handle(new Action(message.type, message.value));
       });
       // handle io disconnect
