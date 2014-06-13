@@ -28,11 +28,11 @@ function handler(req, res) {
 app.listen(8081);
 
 // create amqp connection and wait for socket
+var count = 0;
 var connection = amqp.createConnection({url: "amqp://guest:guest@localhost:5672"});
 var queueFactory = queueManager.factory(connection);
 connection.on('ready', function () {
   // socket.io
-  var count = 0;
   io.sockets.on('connection', function (socket) {
     // create an user and increase count
     var userName = 'user_' + count++;
@@ -45,11 +45,7 @@ connection.on('ready', function () {
       var actionHandler = new ActionHandler(socket);
       var userBindingKey = queueFactory.createBindingKey(userData.vendor, userData.platform);
       var queue = queueFactory.createQueue(userName, userBindingKey, function (message) {
-        if (message === 'clear') {
-          actionHandler.handle(new Action('clear', ''));
-        } else {
-          actionHandler.handle(new Action('color', message));
-        }
+        actionHandler.handle(new Action(message.type, message.value));
       });
       // handle io disconnect
       socket.on('disconnect', function () {
@@ -59,4 +55,13 @@ connection.on('ready', function () {
       });
     });
   });
+  // handle SIGINT
+  process.on('SIGINT', function () {
+    for (var i = 0; i < count; i++) {
+      // remove all users
+      connection.publish('server.remove.user.queue', { name: 'user_' + i });
+    }
+    process.exit();
+  });
 });
+

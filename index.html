@@ -52,9 +52,9 @@
       //
       var wall = $('#wall');
       socket.on('workers', function (data) {
-        if(data.type === 'clear') {
+        if(data.type === 'CLEAR') {
           wall.empty();
-        } else if(data.type === 'color') {
+        } else if(data.type === 'COLOR') {
           testColor(data.value, function(color) {
             wall.append('<div class="col-md-1 red" style="background-color: ' + color + ';"></div>');
           });
