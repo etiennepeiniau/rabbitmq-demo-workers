@@ -10,17 +10,32 @@
 
     <link href="//getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-      #wall * {
-        width: 30px;
-        height: 30px;
-        margin: 5px 5px;
+      body {
+        background-color: #2D2D2D;
+        font-family: adobe-clean,"Helvetica Neue",Helvetica,Arial,sans-serif;
+      }
+
+      #name {
+        color: darkgray;
+      }
+
+      #wall .pixel {
+        height: 0px;
+        padding-bottom: 8%;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <div id="name" class="row"><h1></h1></div>
-      <div id="wall" class="wall row"></div>
+      <div class="row">
+        <div id="name" class="col-xs-12">
+          <h1></h1>
+        </div>
+      </div>
+      <div class="row">
+        <div id="wall" class="col-xs-12">
+        </div>
+      </div>
     </div>
     <div id="color-tester" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -49,14 +64,26 @@
           platform : window.navigator.platform
         });
       });
-      //
+      // handling wall creation
       var wall = $('#wall');
+      var count = 0;
+      var rowCount = 0;
+      var currentRow = undefined;
       socket.on('workers', function (data) {
         if(data.type === 'CLEAR') {
           wall.empty();
+          count = 0;
+          rowCount = 0;
+          currentRow = undefined;
         } else if(data.type === 'COLOR') {
           testColor(data.value, function(color) {
-            wall.append('<div class="col-md-1 red" style="background-color: ' + color + ';"></div>');
+            if(count % 12 === 0) {
+              var rowId = 'row_' + rowCount++;
+              wall.append('<div id="' + rowId + '" class="row"></div>')
+              currentRow = $('#' + rowId);
+            }
+            currentRow.append('<div class="pixel col-xs-1" style="background-color: ' + color + ';"></div>');
+            count ++;
           });
         }
       });
