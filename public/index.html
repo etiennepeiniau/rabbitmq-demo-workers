@@ -8,7 +8,7 @@
       RabbitMQ, Node, Socket.io
     </title>
 
-    <link href="//getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
     <style>
       body {
         background-color: #2D2D2D;
@@ -38,7 +38,7 @@
       </div>
     </div>
     <div id="color-tester" />
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       // simple color test method
@@ -54,7 +54,11 @@
         }
       }
       // listening to socket.io
-      var socket = io.connect('http://' + window.location.hostname + ':8081');
+      if( window.location.port !== "") {
+        var socket = io.connect('http://' + window.location.hostname + ':' + window.location.port);
+      } else {
+        var socket = io.connect('http://' + window.location.hostname);
+      }
       // handling user name
       socket.on('user.name',function (data) {
         $('#name h1').text(data.name);

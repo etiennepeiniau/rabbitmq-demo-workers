@@ -3,6 +3,7 @@
 // natives
 var app = require('http').createServer(handler)
   , fs = require('fs')
+  , content = require('node-static')
 // dependencies
   , io = require('socket.io').listen(app)
   , amqp = require('amqp')
@@ -13,17 +14,13 @@ var app = require('http').createServer(handler)
 
 
 // start app server
-function handler(req, res) {
-  fs.readFile(__dirname + '/index.html',
-    function (err, data) {
-      if (err) {
-        res.writeHead(500);
-        return res.end('Error loading index.html');
-      }
-
-      res.writeHead(200);
-      res.end(data);
-    });
+var fileServer = new content.Server('./public');
+function handler(request, response) {
+  console.log('request');
+  request.addListener('end', function () {
+    console.log('inside');
+    fileServer.serve(request, response);
+  }).resume();
 }
 app.listen(8081);
 
